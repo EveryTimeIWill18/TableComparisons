@@ -73,9 +73,10 @@ class TableComparison(object):
                 # Create instances of the DataTable class
                 df_one = DataTable()
                 df_two = DataTable()
+
+                # Grab the file extension for each file
                 file_extension_t0 = os.path.splitext(t[0])
                 file_extension_t1 = os.path.splitext(t[1])
-                print(file_extension_t1)
 
                 # Both files are excel files
                 if file_extension_t0[-1] == '.xlsx' and file_extension_t1[-1] == '.xlsx':
@@ -110,13 +111,26 @@ class TableComparison(object):
                 for k in temp_dict.keys():
                     temp_list = list(temp_dict[k])
                     true_list = []
-                    for i in temp_list:
-                        if i == True:
-                            true_list.append(i)
+                    false_dict = {}
+                    for i, v in enumerate(temp_list):
+                        if v == True:
+                            true_list.append(v)
+                        if v == False:
+                            # Grab the column names
+                            col_t0 = str(k).split('_')[0]
+                            col_t1 = str(k).split('_')[-1]
+                            # Update the false_dict with the row number and values
+                            #  that differed for the current column
+                            # NOTE: Added an underscore to col_t1 since data will be lost if
+                            #   the column names are the same as dictionary keys must be unique
+                            false_dict.update({'Row Number': i,
+                                        col_t0: df_one.data_frame[col_t0].iloc[i],
+                                        '_{}'.format(col_t1): df_two.data_frame[col_t1].iloc[i]})
                     # Update the true_counts dictionary
                     true_counts[k] = {'Number of Rows': len(temp_list),
                                       'Number of Identical Rows': len(true_list),
-                                      'Percent of Identical Rows Between Tables(%)': float(len(true_list) / len(temp_list))}
+                                      'Percent of Identical Rows Between Tables(%)': float(len(true_list) / len(temp_list)),
+                                      'False Values': false_dict}
 
                 # Insert the true_counts dictionary into the master level dictionary
                 self.master_dict['{}_vs_{}'.format(os.path.basename(t[0]), os.path.basename(t[1]))] = true_counts
