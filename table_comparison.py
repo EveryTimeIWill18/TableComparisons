@@ -10,7 +10,7 @@ import multiprocessing
 from pprint import pprint
 from itertools import combinations
 from collections import OrderedDict
-from typing import List, Dict, Any, Tuple, OrderedDict
+from typing import List, Dict, Any, Tuple
 
 # Number of CPUs
 CPUS = multiprocessing.cpu_count()
@@ -70,6 +70,7 @@ class TableComparison(object):
         try:
             # Create a tuple of all file combinations for comparison
             table_comparisons = list(combinations(file_names, 2))
+            print(table_comparisons)
 
             # Run a comparison on each tuple from table_combinations
             for t in table_comparisons:
@@ -126,9 +127,15 @@ class TableComparison(object):
                             #  that differed for the current column
                             # NOTE: Added an underscore to col_t1 since data will be lost if
                             #   the column names are the same as dictionary keys must be unique
-                            false_dict.update({'Row Number': i,
-                                        col_t0: df_one.data_frame[col_t0].iloc[i],
-                                        '_{}'.format(col_t1): df_two.data_frame[col_t1].iloc[i]})
+                            if col_t0 not in false_dict.keys():
+                                false_dict[col_t0] = [{'Row Number': i,
+                                                       col_t0: df_one.data_frame[col_t0].iloc[i],
+                                                       '_{}'.format(col_t1): df_two.data_frame[col_t1].iloc[i]}]
+                            else:
+                                false_dict[col_t0].append({'Row Number': i,
+                                                       col_t0: df_one.data_frame[col_t0].iloc[i],
+                                                       '_{}'.format(col_t1): df_two.data_frame[col_t1].iloc[i]})
+
                     # Update the true_counts dictionary
                     true_counts[k] = {'Number of Rows': len(temp_list),
                                       'Number of Identical Rows': len(true_list),
@@ -152,17 +159,19 @@ class TableComparison(object):
 def main():
     # Files for testing
     file_one = r'C:\Users\moder\OneDrive\Desktop\sample_testing_xlsx.xlsx'
-    file_two = r'C:\Users\moder\OneDrive\Desktop\sample_testing_xlsx_copy.xlsx'
+    file_two = r'C:\Users\moder\OneDrive\Desktop\sample_testing_xlsx_copy_2.xlsx'
     file_three = r'C:\Users\moder\OneDrive\Desktop\sample_testing_diff_copy.xlsx'
+    file_four = r'C:\Users\moder\OneDrive\Desktop\sample_testing_xlsx_copy_3.xlsx'
 
     # Set up the dictionary for sheet_names
     sheet_names = {'sample_testing_xlsx.xlsx': 'Sheet1',
-                  'sample_testing_xlsx_copy.xlsx': 'Sheet1',
-                  'sample_testing_diff_copy.xlsx': 'Sheet1'}
+                  'sample_testing_xlsx_copy_2.xlsx': 'Sheet1',
+                  'sample_testing_diff_copy.xlsx': 'Sheet1',
+                   'sample_testing_xlsx_copy_3.xlsx': 'Sheet1'}
 
     # Table comparisons
     tbl_comparisons = TableComparison()
-    tbl_comparisons.run_table_comparison(sheet_names, file_one, file_two, file_three)
+    tbl_comparisons.run_table_comparison(sheet_names, file_one, file_two, file_three, file_four)
     pprint(tbl_comparisons.master_dict)
 
 
