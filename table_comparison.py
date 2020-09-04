@@ -1,6 +1,7 @@
 """
 table_comparison.py
 ~~~~~~~~~~~~~~~~~~~
+
 """
 import os
 import pandas as pd
@@ -52,7 +53,7 @@ class TableComparison(object):
     def __init__(self):
         self.master_dict: Dict[str, Any] = {}
 
-    def run_table_comparison(self, *file_names) -> None:
+    def run_table_comparison(self, sheet_names=None, *file_names) -> None:
         """Perform tables comparisons on a given set of files
         Attributes
         ----------
@@ -60,6 +61,8 @@ class TableComparison(object):
             This is a dynamically sized variable that can take any number of fully qualified file
             paths in to perform
 
+        sheet_names: dict
+            A dictionary of sheet names with the key being the file name
         Returns
         -------
         None
@@ -81,16 +84,16 @@ class TableComparison(object):
                 # Both files are excel files
                 if file_extension_t0[-1] == '.xlsx' and file_extension_t1[-1] == '.xlsx':
                     # Load in the data sets
-                    df_one.load_data_frame(full_file_path=t[0], sheet_name='Sheet1')
-                    df_two.load_data_frame(full_file_path=t[1], sheet_name='Sheet1')
+                    df_one.load_data_frame(full_file_path=t[0], sheet_name=sheet_names[os.path.basename(t[0])])
+                    df_two.load_data_frame(full_file_path=t[1], sheet_name=sheet_names[os.path.basename(t[1])])
                 # File 1 is excel and file 2 is a csv file
                 elif file_extension_t0[-1] == '.xlsx' and file_extension_t1[-1] == '.csv':
-                    df_one.load_data_frame(full_file_path=t[0], sheet_name='Sheet1')
+                    df_one.load_data_frame(full_file_path=t[0], sheet_name=sheet_names[os.path.basename(t[0])])
                     df_two.load_data_frame(full_file_path=t[1])
                 # File 1 is a csv file and File 2 is an excel file
                 elif file_extension_t0[-1] == '.csv' and file_extension_t1[-1] == '.xlsx':
                     df_one.load_data_frame(full_file_path=t[0])
-                    df_two.load_data_frame(full_file_path=t[1], sheet_name='Sheet1')
+                    df_two.load_data_frame(full_file_path=t[1], sheet_name=sheet_names[os.path.basename(t[1])])
                 # Both files are csv files
                 elif file_extension_t0[-1] == '.csv' and file_extension_t1[-1] == '.csv':
                     df_one.load_data_frame(full_file_path=t[0])
@@ -152,14 +155,14 @@ def main():
     file_two = r'C:\Users\moder\OneDrive\Desktop\sample_testing_xlsx_copy.xlsx'
     file_three = r'C:\Users\moder\OneDrive\Desktop\sample_testing_diff_copy.xlsx'
 
-
-    # Data table creation
-    dt_one = DataTable()
-    dt_one.load_data_frame(full_file_path=file_one, sheet_name='Sheet1')
+    # Set up the dictionary for sheet_names
+    sheet_names = {'sample_testing_xlsx.xlsx': 'Sheet1',
+                  'sample_testing_xlsx_copy.xlsx': 'Sheet1',
+                  'sample_testing_diff_copy.xlsx': 'Sheet1'}
 
     # Table comparisons
     tbl_comparisons = TableComparison()
-    tbl_comparisons.run_table_comparison(file_one, file_two, file_three)
+    tbl_comparisons.run_table_comparison(sheet_names, file_one, file_two, file_three)
     pprint(tbl_comparisons.master_dict)
 
 
